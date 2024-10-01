@@ -1,0 +1,255 @@
+<!-- Copyright 2018 Infosys Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+
+<!-- templates/task_list.html -->
+
+{% extends 'base.html' %}
+
+
+{% block page_content %}
+
+{% if result and result != "None" %}
+{% if result and result == "Request Submitted Successfully- Servers will be ON-BOARDED into ITOPS framework in sometime" %}
+<div  class="alert alert-success ">{{result}}</div> 
+{%else %}
+<div  class="alert alert-danger ">{{result}}</div> 
+{% endif %}
+{% endif %}
+<script>
+  setTimeout(function(){
+       window.location.href = '{% url "trackresult_task" upload_id None %} ';
+    }, 50000);
+</script>
+
+
+{% if upload_id  %} 
+
+
+
+<div>
+     <h1 align="center">UID:{{upload_id}}
+
+          <a class="btn btn-primary float-end " href="{% url 'downloadrun' upload_id %}">Export</a>
+          {%if upload_run == "successful" %}
+          <a href="{% url 'invokempa' upload_id None %}" class="btn btn-primary float-end" >Onboard</a>
+          {%elif upload_run == "failed" or  upload_run == "mpaFailed"%}  
+          <a href="{% url 'invokempa' upload_id  "reonboard"  %}" class="btn btn-success float-end ">Re-Onboard</a>
+          {%elif upload_run == "pending" %}
+          <a  class="btn btn-primary disabled float-end">Waiting for Onboard</a>
+          {%elif upload_run == "" %}
+          <a  class="btn btn-primary disabled float-end">Waiting for Preliminary Checks</a>
+          {%else%}  
+          <a  class="btn btn-primary disabled float-end">No Server to Onboard</a>
+          {% endif %}  
+     </h1>
+</div>
+
+  <div class="row">
+     <div class="col-md-2">
+          <div class="card bg-success text-white">
+               <div class="card-header">Ongoing Servers</div>
+               <div class="card-body"><h3 align="center" >{{allobjects|length}}</h3></div>
+               <div class="card-footer" align="right" > 
+  
+                    <button type="button" class="btn btn-dark" id="btn1" 
+                    onclick="document.getElementById('allobjects').style.display = 'block';
+                    document.getElementById('blocked_object_list').style.display = 'none';
+                    document.getElementById('failed_object_list').style.display = 'none';
+                    document.getElementById('skipped').style.display = 'none'
+                    document.getElementById('mpaFailed').style.display = 'none'
+                    document.getElementById('complete_object_list').style.display = 'none'">Details</button></div>
+          </div>
+     </div>
+     <div class="col-md-2">
+          <div class="card bg-secondary text-white">
+               <div class="card-header">Servers Completed</div>
+               <div class="card-body"><h3 align="center" >{{complete_object_list|length}}</h3></div>
+               <div class="card-footer" align="right" >
+                        <button type="button" class="btn btn-dark" id="btn4" 
+                        onclick="document.getElementById('allobjects').style.display = 'none';
+                         document.getElementById('blocked_object_list').style.display = 'none'; 
+                         document.getElementById('failed_object_list').style.display = 'none';
+                         document.getElementById('skipped').style.display = 'none'
+                         document.getElementById('mpaFailed').style.display = 'none'
+                         document.getElementById('complete_object_list').style.display = 'block'">Details</button></div>
+          </div>
+     </div>
+
+     <div class="col-md-2">
+          <div class="card bg-warning text-white">
+               <div class="card-header">Server Blocked</div>
+               <div class="card-body"><h3 align="center">{{blocked_object_list|length}}</h3> </div>
+               <div class="card-footer" align="right" >
+                    <button type="button" class="btn btn-dark" id="btn2"
+                     onclick="document.getElementById('allobjects').style.display = 'none'; 
+                     document.getElementById('blocked_object_list').style.display = 'block'; 
+                     document.getElementById('failed_object_list').style.display = 'none';
+                     document.getElementById('skipped').style.display = 'none'
+                     document.getElementById('mpaFailed').style.display = 'none'
+                     document.getElementById('complete_object_list').style.display = 'none'">Details</button></div>
+          </div>
+     </div>
+
+     <div class="col-md-2">
+          <div class="card bg-danger text-white">
+               <div class="card-header">Failed Servers</div>
+               <div class="card-body"><h3 align="center">{{failed_object_list|length}}</h3></div>
+               <div class="card-footer" align="right" >
+                    <button type="button" class="btn btn-dark" id="btn3" 
+                    onclick="document.getElementById('allobjects').style.display = 'none'; 
+                    document.getElementById('blocked_object_list').style.display = 'none'; 
+                    document.getElementById('failed_object_list').style.display = 'block';
+                    document.getElementById('skipped').style.display = 'none'
+                    document.getElementById('mpaFailed').style.display = 'none'
+                    document.getElementById('complete_object_list').style.display = 'none'">Details</button></div>
+          </div>
+     </div> 
+
+     <div class="col-md-2">
+          <div class="card bg-info text-white">
+               <div class="card-header">Skipped Servers</div>
+               <div class="card-body"><h3 align="center">{{skipped|length}}</h3></div>
+               <div class="card-footer" align="right" >
+                    <button type="button" class="btn btn-dark" id="btn3" 
+                    onclick="document.getElementById('allobjects').style.display = 'none'; 
+                    document.getElementById('blocked_object_list').style.display = 'none'; 
+                    document.getElementById('skipped').style.display = 'block'
+                    document.getElementById('mpaFailed').style.display = 'none'
+                    document.getElementById('failed_object_list').style.display = 'none';
+                    document.getElementById('complete_object_list').style.display = 'none'">Details</button></div>
+          </div>
+     </div>  
+     <div class="col-md-2">
+          <div class="card bg-primary text-white">
+               <div class="card-header">Reonboard Servers</div>
+               <div class="card-body"><h3 align="center">{{mpaFailed|length}}</h3></div>
+               <div class="card-footer" align="right" >
+                    <button type="button" class="btn btn-dark" id="btn3" 
+                    onclick="document.getElementById('allobjects').style.display = 'none'; 
+                    document.getElementById('blocked_object_list').style.display = 'none'; 
+                    document.getElementById('skipped').style.display = 'none'
+                    document.getElementById('mpaFailed').style.display = 'block'
+                    document.getElementById('failed_object_list').style.display = 'none';
+                    document.getElementById('complete_object_list').style.display = 'none'">Details</button></div>
+          </div>
+     </div>    
+     
+    
+</div><br>
+
+      <div class="row"  id="allobjects" style="display: none;">
+      {% if allobjects %}
+      <h4>Processed Servers </h4>
+      <table  class="table">
+        <thead><tr><th>Hostname</th><th>State</th><th>Action</th><th>Remarks</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for task in allobjects %}
+        <tr>
+        <td>{{ task.hostname }}</td><td>{{ task.state }}</td><td>{{ task.action }}</td><td>{{task.remarks|split:"~~"|first }}</td>
+        <td><a href={% url 'serverpatchdetails_detail' task.id %} class="btn btn-dark">Details</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>      
+      {% endif %}
+      </div>
+      <div class="row"   id="complete_object_list" style="display: none;">
+      {% if complete_object_list %}
+      <h4>Completed Servers </h4>
+      <table  class="table">
+        <thead><tr><th>Hostname</th><th>State</th><th>Action</th><th>Remarks</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for task in complete_object_list %}
+        <tr>
+        <td>{{ task.hostname }}</td><td>{{ task.state }}</td><td>{{ task.action }}</td><td>{{task.remarks|split:"~~"|first }}</td>
+        <td><a href={% url 'serverpatchdetails_detail' task.id %} class="btn btn-dark">Details</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>     
+      {% endif %}
+      </div>
+      <div class="row"  id="blocked_object_list" style="display: none;">
+      {% if blocked_object_list %}
+      <h4>Failed Servers </h4>
+      <table  class="table" >
+        <thead><tr><th>Hostname</th><th>State</th><th>Action</th><th>Remarks</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for task in blocked_object_list %}
+        <tr>
+        <td>{{ task.hostname }}</td><td>{{ task.state }}</td><td>{{ task.action }}</td><td>{{task.remarks|split:"~~"|first }}</td>
+        <td><a href={% url 'serverpatchdetails_detail' task.id %} class="btn btn-dark">Details</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>  
+      {% endif %}  
+      </div>
+      <div class="row"  id="failed_object_list" style="display: none;">
+          {% if failed_object_list %}
+          <h4>Failed Servers </h4>
+          <table  class="table" >
+            <thead><tr><th>Hostname</th><th>State</th><th>Action</th><th>Remarks</th><th>Actions</th></tr></thead>
+            <tbody>
+            {% for task in failed_object_list %}
+            <tr>
+            <td>{{ task.hostname }}</td><td>{{ task.state }}</td><td>{{ task.action }}</td><td>{{task.remarks|split:"~~"|first }}</td>
+            <td><a href={% url 'serverpatchdetails_detail' task.id %} class="btn btn-dark">Details</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+            </table>  
+          {% endif %}  
+     </div>
+      <div class="row" id="skipped" style="display: none;">
+      {% if skipped %}
+      <h4>Skipped Rows</h4>
+      <table  class="table" >
+        <thead><tr><th>Upload id</th><th>Hostname</th><th>Action</th><th>Remarks</th></tr></thead>
+        <tbody>
+        {% for task in skipped %}
+        <tr>
+<!--          <td>{{ task.uploadid }}</td><td>{{ task.hostname }}</td><td>Skipped</td><td>Part of other runs</td>-->
+	  <td><a href ="../{{task.old_uploadid}}/None">{{ task.old_uploadid }}</a></td><td>{{ task.hostname }}</td><td>Skipped</td><td>Part of other runs</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+      {% endif %}
+      </div>
+      <div class="row" id="mpaFailed" style="display: none;">
+          {% if mpaFailed %}
+          <h4>Skipped Rows</h4>
+          <table  class="table" >
+               <thead><tr><th>Hostname</th><th>State</th><th>Action</th><th>Remarks</th><th>Actions</th></tr></thead>
+               <tbody>
+               {% for task in mpaFailed %}
+               <tr>
+               <td>{{ task.hostname }}</td><td>{{ task.state }}</td><td>{{ task.action }}</td><td>{{task.remarks|split:"~~"|first }}</td>
+               <td><a href={% url 'serverpatchdetails_detail' task.id %} class="btn btn-dark">Details</a></td>
+               </tr>
+               {% endfor %}
+               </tbody>
+               </table>  
+          {% endif %}
+          </div>
+      {% endif %}
+{% endblock page_content %}

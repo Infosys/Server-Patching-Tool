@@ -1,0 +1,99 @@
+<!-- Copyright 2018 Infosys Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+
+<!-- rows/templates/rows/row_index.html -->
+
+{% extends "base.html" %}
+
+{% block page_content %}
+<h1>Server Patch Details</h1>
+<div class="row">
+{% if objects %} 
+
+<table>
+            <tr>
+                <td valign="top"  width="60%"> <font size=2>   
+                    <table class="table" >
+                        <thead>
+                            <tr><th>Hostname</th><th>State</th><th>Action</th><th>remarks</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for serverpatchdetails in objects %}
+                                <tr>
+                                    <td>{{ serverpatchdetails.hostname }}</td>                  
+                                    <td>{{ serverpatchdetails.state }}</td>
+                                    <td>{{ serverpatchdetails.action }}</td>
+                                    <td>{{ serverpatchdetails.remarks }}</td>
+                                </tr>
+                                {% endfor %}
+                        </tbody>
+                    </table></font>
+            </td>                  
+            <td valign="top" width="40%">    
+                <div class="container">
+                    <div class="card">
+                        <div class="card-body">
+                            <form action="{% url "invokeplaywright" %} " method="post">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control"id="username"name="username" placeholder="Enter your username">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control"id="password" name="password" placeholder="Enter your password">
+                                    <input type="hidden"  name="uploadid"  id="uploadid"value="{{uploadid}}" >
+                                    <input type="hidden"  name="runid"  id="runid"value="{{runid}}" >
+                                    <input type="hidden"  name="isreboot"  id="runid"value="{{isreboot}}" >
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Note: Passwords are encrypted before processing.For Security purpose, reset your password after an hour. </label>
+                                </div>    
+                                <button type="submit" class="btn btn-primary">Submit</button>   
+                            </form>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card bg-info text-white">
+                        <div class="card-header">Tips to overcome failures</div>
+                        <div class="card-body">
+                            <font size=2>
+                            <b> Please be aware the process is time bounded delay/error will break the journey and have to be retried.</b>
+                             <ul><li>Ensure you are entering the BT Mail ID</li>
+                            <li>Ensure you got MPA access for all servers</li>
+                        <li>Before Submitting the form, login into MPA using chrome and see you are not getting any declaration or popups </li>
+                    <li>Keep your mobile handy and try to authenticate the call ASAP. Not to wait for the IVR.</li>  </font>
+                        </div>
+                    </div>
+                </div>
+            </td>
+               
+            </tr>
+
+</table>
+
+
+
+{%else%}
+   <h2> No Server Details found </h2>
+{% endif%}   
+</div>   
+{% endblock %}

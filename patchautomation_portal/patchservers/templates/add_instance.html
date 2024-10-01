@@ -1,0 +1,65 @@
+<!-- Copyright 2018 Infosys Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+
+{% extends "base.html" %}
+
+{% block page_content %}
+
+<script>
+    $(document).ready(function() {
+        $('#table').DataTable({
+
+            dom: 'Bfrtip',
+            pageLength: 50,
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ]
+
+        });
+    });
+</script>
+
+    <div  class="alert alert-info ">{{result}}</div>
+<div class="row">
+    <div class="col-md-4">
+          <div class="card bg-light">
+               <div class="card-header">Add New Apllication</div>
+               <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+               <div class="card-body">
+                    <div class="form-group col-md-10">
+                         <label for="options1" class="control-label">Lot:</label>
+                         <input type="text"  class="form-control"  id="lot" name="lot" required>
+                        <label for="options2" class="control-label">AppID:</label>
+                         <input type="text"  class="form-control"  id="appid" name="appid" required>
+                         <label for="options3" class="control-label">Application Name:</label>
+                        <input type="text"  class="form-control"  id="appname" name="appname" required>
+                        </div>
+
+               </div>
+               <div class="card-footer"><button type="submit" class="btn btn-success upload" >submit</button></div>
+               </form>
+
+          </div>
+     </div>
+
+</div>
+{% endblock %}

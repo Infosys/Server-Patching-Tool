@@ -1,0 +1,117 @@
+<!-- Copyright 2018 Infosys Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+
+
+{% extends 'base.html' %}
+
+{% block page_content %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/b-print-1.6.1/r-2.2.3/datatables.min.css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/b-print-1.6.1/r-2.2.3/datatables.min.js"></script>
+
+
+    <h3 align="center" >Server Patch Details: Grouped by State</h3>
+    <br><br>
+    <div class="accordion" id="accordionExample">
+
+        {% for key,value in grouped_by_action.items %}
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button d-block text-center" type="button" data-bs-toggle="collapse" data-bs-target="#a{{ value.0.id }}a" aria-expanded="true" aria-controls="a{{ value.0.id }}a">
+                        {{ key }} - ({{ value.count }})
+                    </button>
+                </h2>
+
+                <div id="a{{ value.0.id }}a" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                  
+                    <script>
+
+
+                        $(document).ready(function() {
+                            $('#table{{ value.0.id }}').DataTable({
+
+                                dom: 'Bfrtip',          
+                                pageLength: 50,            
+                                buttons: [
+                                    'copy', 'csv', 'excel', 'pdf', 'print'
+                                ]
+
+                            });
+                        });
+                        
+                    </script>
+                    <div class="accordion-body">
+                        <font size=2>
+                        <table id="table{{ value.0.id }}" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>                                    
+                                    <th>Upload ID</th>
+                                    <th>Lot</th>
+                                    <th>AppID</th>
+                                    <th>AppName</th>
+                                    <th>Hostname</th>
+                                    <th>State</th>
+                                    <th>Action</th>
+                                    <th>Remarks</th>
+                                    <th>OS Make</th>
+                                    <th>OS Version</th>
+                                    <th>Latest Patch</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                        {% for i in value %}
+                        
+                        <tr>
+                            <td> <a href ="../trackresult/{{i.uploadid}}/None">{{ i.uploadid }}</a></td>
+                            <td> {{i.instance__lot}}</td>
+                            <td> {{i.instance__appid}}</td>
+                            <td> {{i.instance__appname}}</td>
+                            <td> {{ i.hostname }} </td>  
+                            <td> {{ i.state }} </td>                         
+                            <td> {{ i.action }} </td>
+                            <td> {{ i.remarks }} </td>
+                            <td> {{ i.osmake }} </td>
+                            <td> {{ i.osversion }} </td>
+                            <td> {{ i.latestpatch }} </td>
+                            <td><a href="/{{i.id }}" class="btn btn-primary">Details</a></td>
+                        </tr>   
+                
+                    
+                {% endfor %}
+            </table> </font>
+                        </div>
+                    </div>
+                </div>
+            
+
+                {% endfor %}
+</div>
+
+
+
+
+
+
+
+{% endblock page_content %}
+

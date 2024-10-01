@@ -1,0 +1,204 @@
+<!-- Copyright 2018 Infosys Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+
+{% extends 'base.html' %}
+
+{% block page_content %}
+<link rel="stylesheet" type="text/css"   href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/b-print-1.6.1/r-2.2.3/datatables.min.css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript"   src="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/b-print-1.6.1/r-2.2.3/datatables.min.js"></script>
+
+
+<script>
+  $(document).ready(function () {
+      $('#table').DataTable({
+
+          dom: 'Bfrtip',
+          pageLength: 50,
+          buttons: [
+              'copy', 'csv', 'excel', 'pdf', 'print'
+          ]
+
+      });
+  });
+</script>
+
+
+<div class="container">
+  <font size=2>
+    <div class="row">
+      <div>
+        <h3>Grouped by action</h3>
+        <canvas id="action-chart" style="width:900px;height:400px;"></canvas>
+      </div>
+    </div> <br><br>
+    <div class="row">
+      <table>
+        <tr>
+          <td>
+            <div style="width:400px;">
+              <h3>Grouped by OS Make</h3>
+              <canvas id="osmake-chart"></canvas>
+            </div>
+          </td>
+          <td align="center">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>OS Version</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for field in data.osmake_counts %}
+                <tr>
+                  <td>{{ field.osversion }}</td>
+                  <td>{{ field.count }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <br><br>
+
+    <div class="row">
+      <table>
+        <tr>
+          <td>
+            <div style="width:600px;">
+              <h3>Grouped by Patch Level</h3>
+              <canvas id="remarks-chart"></canvas>
+            </div>
+          </td>
+          <td align="center">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Current Patch</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for field in data.latest_counts %}
+                <tr>
+                  <td>{{ field.latestpatch }}</td>
+                  <td>{{ field.count }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <br><br> 
+  </font>
+</div>
+
+<script>
+  const osmake_data = {
+    labels: [{% for item in osmake_keys %}"{{ item }}", {% endfor %}],
+  datasets: [
+    {
+      label: "OS Make",
+      data: [{% for item in osmake_values %}"{{ item }}", {% endfor %}],
+                },
+              ],
+            };
+
+  const remark_data = {
+    labels: [{% for item in latest_keys %}"{{ item }}", {% endfor %}],
+  datasets: [
+    {
+      label: "Patch Level",
+      data: [{% for item in latest_values %}"{{ item }}", {% endfor %}],
+                },
+              ],
+            };
+  var barColors = ["#FF000080", "#FFA50080", "#007dff95", "#FF000080", "#FFA50080", "#007dff95"];
+  const action_data = {
+    labels: [{% for item in action_keys %}"{{ item }}", {% endfor %}],
+  datasets: [
+    {
+      backgroundColor: barColors,
+      label: "action",
+      data: [{% for item in action_values %}"{{ item }}", {% endfor %}],
+                },
+              ],
+            };
+
+  const app_data = {
+    labels: [{% for item in app_keys %}"{{ item }}", {% endfor %}],
+  datasets: [
+    {
+      label: "Count",
+      data: [{% for item in app_values %}"{{ item }}", {% endfor %}],
+                },
+              ],
+            };
+  const options = {
+    responsive: true,
+
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            beginAtZero: true,
+          },
+        },
+      ],
+    },
+  };
+
+  const osmakeCtx = document.getElementById("osmake-chart").getContext("2d");
+  const osmakeChart = new Chart(osmakeCtx, {
+    type: "doughnut",
+    data: osmake_data,
+    options: options,
+  });
+
+  const remarksCtx = document.getElementById("remarks-chart").getContext("2d");
+  const remarksChart = new Chart(remarksCtx, {
+    type: "pie",
+    data: remark_data,
+    options: options,
+  });
+
+  const actionCtx = document.getElementById("action-chart").getContext("2d");
+  const actionChart = new Chart(actionCtx, {
+    type: "bar",
+    data: action_data,
+    options: options,
+  });
+
+  const appCtx = document.getElementById("app-chart").getContext("2d");
+  const appChart = new Chart(appCtx, {
+    type: "polarArea",
+    data: app_data,
+    options: options,
+  });
+</script>
+
+{% endblock page_content %}

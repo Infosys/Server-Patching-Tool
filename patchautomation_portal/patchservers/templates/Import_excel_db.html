@@ -1,0 +1,268 @@
+<!-- Copyright 2018 Infosys Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+
+<!-- serverpatchdetailss/templates/serverpatchdetailss/serverpatchdetails_index.html -->
+
+{% extends "base.html" %}
+
+{% block page_content %}
+ 
+
+<div  class="alert alert-info ">{{result}}</div> 
+
+<div class="row">
+    <div class="col-md-4">
+          <div class="card bg-light">
+               <div class="card-header">Upload a new Batch</div>
+               <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+               <div class="card-body">                    
+                    <div class="form-group col-md-12 float-right">
+                         <label for="myfile" class="control-label">Template file.</label>
+                         <a  class="btn btn-success " href="{% url 'download_template' %}">Download Template</a>
+                    </div>
+                    <div class="form-group col-md-12">
+                         <label for="myfile" class="control-label">Upload File</label>
+                         <input type="file" name="myfile" class="form-control"> 
+                    </div>
+                    <div class="form-group col-md-6">
+                         <label for="options1" class="control-label">Lot</label>
+                         <select name="options1"  id="options1" class="form-control"> 
+                              <option value="">Select the Lot</option>   
+                              <option value="Lot1">Lot1</option>                
+                              <option value="Lot3">Lot3</option>
+                              <option value="Lot4">Lot4</option>
+                              <option value="Lot5">Lot5</option> 
+                              <option value="Lot6">Lot6</option>              
+                         </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                         <label for="options2" class="control-label">AppID</label>
+                         <select name="options2" id="options2" class="form-control" >
+                              <option value="">Select App ID</option>
+                              {% for option in sorted_appid %}
+                              <option value="{{ option.appid }}">{{ option.appid}}</option>
+                              {% endfor %}
+                         </select>
+                    </div>
+                    <div class="form-group col-md-12">
+                         <label for="options3" class="control-label">Application Name:</label>
+                         <select name="options3" id="options3" class="form-control">
+                              <option value="">Select Application Name</option>
+                              {% for option in sorted_appname %}
+                              <option value="{{ option.appname}}">{{ option.appname}}</option>
+                              {% endfor %}
+                         </select>
+                    </div>
+                    <div class="form-group col-md-12">
+                         <label for="username" class="control-label">Name of the ASM person </label>
+                         <input type="text" name="username" class="form-control"> 
+                    </div>     
+               </div>
+               <div class="card-footer"><button type="submit" class="btn btn-success upload" >Upload data</button></div>
+               </form> 
+          </div>
+     </div>
+     <div class="col-md-2">
+          <div class="card bg-success text-white">
+               <div class="card-header">Server Which Need Onboarding</div>
+               <div class="card-body"><h3 align="center" >{{onboardlistl}}</h3></div>
+               <div class="card-footer" align="right" > 
+  
+                    <button type="button" class="btn btn-primary" id="btn1" 
+                    onclick="document.getElementById('valid').style.display = 'block';
+                    document.getElementById('invalid').style.display = 'none';
+                    document.getElementById('duplicates').style.display = 'none'
+                    document.getElementById('ready').style.display = 'none'">Details</button></div>
+          </div>
+     </div>
+     <div class="col-md-2">
+          <div class="card bg-secondary text-white">
+               <div class="card-header">Server Scheduled for patching</div>
+               <div class="card-body"><h3 align="center" >{{readylistl}}</h3></div>
+               <div class="card-footer" align="right" >
+                        <button type="button" class="btn btn-primary" id="btn4" 
+                        onclick="document.getElementById('valid').style.display = 'none';
+                         document.getElementById('invalid').style.display = 'none'; 
+                         document.getElementById('duplicates').style.display = 'none'
+                         document.getElementById('ready').style.display = 'block'">Details</button></div>
+          </div>
+     </div>
+
+     <div class="col-md-2">
+          <div class="card bg-warning text-white">
+               <div class="card-header">Server Scheduled or InProgress</div>
+               <div class="card-body"><h3 align="center">{{invalidlistl}}</h3> </div>
+               <div class="card-footer" align="right" >
+                    <button type="button" class="btn btn-primary" id="btn2"
+                     onclick="document.getElementById('valid').style.display = 'none'; 
+                     document.getElementById('invalid').style.display = 'block'; 
+                     document.getElementById('duplicates').style.display = 'none'
+                     document.getElementById('ready').style.display = 'none'">Details</button></div>
+          </div>
+     </div>
+
+     <div class="col-md-2">
+          <div class="card bg-info text-white">
+               <div class="card-header">Duplicate Servers Uploaded</div>
+               <div class="card-body"><h3 align="center">{{hostname_duplicatesl}}</h3></div>
+               <div class="card-footer" align="right" >
+                    <button type="button" class="btn btn-primary" id="btn3" 
+                    onclick="document.getElementById('valid').style.display = 'none'; 
+                    document.getElementById('invalid').style.display = 'none'; 
+                    document.getElementById('duplicates').style.display = 'block'
+                    document.getElementById('ready').style.display = 'none'">Details</button></div>
+          </div>
+     </div>           
+     <div id="loader" class="loader" align="center"></div>
+</div>
+<div class="row" >
+<style> 
+     .blink {
+     animation: blink 10s infinite;
+   }
+   
+   .blink1 {
+     animation: blink 2s infinite;
+   }
+
+   @keyframes blink {
+     0% {
+       opacity: 0;
+     }
+     50% {
+       opacity: 1;
+     }
+     100% {
+       opacity: .5;
+     }
+   }
+
+   #loadingModal {
+     position: fixed;
+     top: 400px;
+     left: 500px;
+     width: 100%;
+     height: 100%;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+   }
+   
+   .modal-content {
+     width: 500px;
+     height: 150px;
+     background-color: #fff;
+     border: 1px solid #ccc;
+     text-align: center;
+   }  
+</style>
+<h3 class="blink">Upload id for tracking  : <a href ="../trackresult/{{upload_id}}/None">{{upload_id}} </a></h1>
+</div>
+<div class="row" id="valid" style="display: none;">
+{% if onboardlist %} 
+    <table class="table">
+    <thead><tr><th>HostName</th><th>State</th><th>Action</th><th>Remarks</th></tr></thead><tbody>
+    {% for row in onboardlist %}
+    <tr>
+         <td>{{ row.hostname }} </td><td> {{ row.state }} </td><td> {{ row.action }} </td><td> {{ row.remarks|split:"~~"|first }} </td>
+    </tr>    
+    {% endfor %}
+    </tbody></table>     
+{% endif %}
+</div>
+<div class="row" id="invalid" style="display: none;">
+{% if invalidlist %}   
+     <table class="table">
+     <thead><tr><th>Upload Id</th><th>Host Name</th></tr></thead><tbody>
+     {% for row in invalidlist %}
+     <tr>
+          {% for values in row  %}
+               <td>{{values}}</td>
+          {% endfor %}     
+     </tr>    
+     {% endfor %}
+     </tbody></table>     
+ {% endif %} 
+</div>  
+<div class="row" id="duplicates" style="display: none;">
+     {% if hostname_duplicates %}   
+     <table class="table">
+     <thead><tr><th>Hostname</th></tr></thead><tbody>
+     {% for row in hostname_duplicates %}
+     <tr>
+         <td>{{row}}</td>
+     </tr>
+     {% endfor %}
+     </tbody></table>     
+ {% endif %} 
+</div> 
+<div class="row" id="ready" style="display: none;">
+     {% if readylist %}   
+     <table class="table">
+     <thead><tr><th>HostName</th><th>State</th><th>Action</th><th>Remarks</th></tr></thead><tbody>
+     {% for row in readylist %}
+     <tr>
+          <td>{{ row.hostname }} </td><td> {{ row.state }} </td><td> {{ row.action }} </td><td> {{ row.remarks|split:"~~"|first }} </td>
+     </tr>    
+     {% endfor %}
+     </tbody></table>    
+      {% endif %} 
+     </div>     
+</div>
+
+
+{% load static%}
+
+<script>
+    function showLoadingModal(){
+        loadingModal = document.getElementById('loadingModal')
+        loadingModal.style.display = 'block';
+    }
+
+    const collection = document.getElementsByClassName("btn btn-success upload");
+       for (var i = 0; i < collection.length; i++) {
+           collection[i].addEventListener('click', showLoadingModal);
+       }
+    //For urls: add the class "show-loading-after-click" to any url (a element) you want to show the loader
+    function showLoaderOnUrlClick(url) {       
+        showLoadingModal()
+      window.location=url
+  }
+
+
+</script>
+
+
+
+    <div id="loadingModal" class="modal fade" style="visibility:visible; opacity: 1; display:none;">
+        <div class="modal-content" >
+          <div class="modal-header">Please wait...</div>
+          <div class="modal-body">
+             <font color="blue">  <h6 class="blink1"> Your request is processing. This might take a few moments.</h6></font>   
+          </div>            
+        </div>
+     </div>
+
+
+
+
+{% endblock %}

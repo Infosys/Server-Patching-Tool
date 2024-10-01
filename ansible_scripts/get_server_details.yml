@@ -1,0 +1,117 @@
+- name: Check basic user and latest patch check in destination server
+  hosts:  "{{ host_group }}"
+  gather_facts: false
+  strategy: free
+  vars_files:
+          #    - "{{ encryptedPasswordFile }}"
+    - "Vault/sudoUserEncryptfile.yml"
+  vars:
+    sshLoginSuccess: false
+    sudoAccessSuccess: false
+    osCheck: false
+    basic_user:  "{{ ansible_host }}_user"
+    basic_pass:  "{{ ansible_host }}_pass"
+  tasks:
+      - name: Initialize the user credentials
+        set_fact:
+          hostname: "{{ ansible_host }}"
+
+      - block:
+        - name: Test ssh login to monitorit user on host {{ inventory_hostname }}
+          ansible.builtin.ping:
+          ignore_errors: yes
+          ignore_unreachable: yes
+          register: responseOut
+
+        - name: Set ssh login check flag
+          set_fact:
+            sshLoginSuccess: true
+          when: responseOut.ping is defined
+
+        - name: Test ssh login to user on host {{ inventory_hostname }}
+          ansible.builtin.ping:
+          vars:
+            ansible_user: "{{ lookup('vars', basic_user) }}"
+            ansible_ssh_pass: "{{ lookup('vars', basic_pass) }}"
+          ignore_errors: yes
+          ignore_unreachable: yes
+          register: responseOut
+
+        - name: Set ssh login check flag
+          set_fact:
+            sshLoginSuccess: true
+            ansible_user: "{{ lookup('vars', basic_user) }}"
+            ansible_ssh_pass: "{{ lookup('vars', basic_pass) }}"
+          when: responseOut.ping is defined and not sshLoginSuccess
+
+        - name : Set Failed flag in ssh login check
+          set_fact:
+            action: 'Credentials Failed'
+            state: 'Blocked'
+            remarks: 'Basic User credentials login failed'
+          when: not sshLoginSuccess
+
+        - name : Failed in ssh login check
+          ansible.builtin.fail:
+            msg: "{{ responseOut.msg }}"
+          when: not sshLoginSuccess
+
+        - name: Get the current onepatch version on the server
+          command: grep -Po '(?<=\().*?(?=\))' /etc/sysconfig
+          become: no
+          register: responseOut
+          ignore_errors: yes
+
+        - name: Set the patch version
+          set_fact:
+            patch_version: "{{ responseOut.stdout_lines[0] }}"
+          when: responseOut is succeeded
+          ignore_errors: yes
+
+        - name: Get the current onepatch version on the server
+          command:  echo `uptime -p` '('`date -I`')'
+          become: no
+          register: responseOut
+          ignore_errors: yes
+
+        - name: Set the patch version
+          set_fact:
+            uptime_currtime: "{{ responseOut.stdout_lines[0] }}"
+          when: responseOut is succeeded
+          ignore_errors: yes
+  
+        rescue:
+          - name: Accumulate failure
+            set_fact:
+              finalStatus:
+                host: "{{ inventory_hostname }}"
+                taskname: "{{ ansible_failed_task['name'] }}"
+                remarks: "Host is not eligible for patching. {{ remarks }}. ~~ Job failed with job id: {{ hostvars[inventory_hostname].awx_job_id }}"
+                action: "{{ action }}"
+                state: "{{ state }}"
+                response: "{{ responseOut.msg }}"
+              rescued: yes
+            ignore_errors: yes
+
+      - name: Update the Onboard status to DB
+        environment:
+          no_proxy: localhost,127.0.0.1
+        uri:
+          url: "http://<ServerEndpoints_APP>/updatelatestpatch"
+          method : POST
+          body: {
+                  "hostname": "{{ inventory_hostname }}",
+                  "latestpatch":"{{ patch_version | default( '', true) }}",
+                  "uptime":"{{ uptime_currtime }}"
+                  }
+          body_format: json
+          return_content: yes
+        register: responseOut
+        delegate_to: 127.0.0.1
+        when: not rescued
+
+      - debug:
+          var: responseOut
+
+
+

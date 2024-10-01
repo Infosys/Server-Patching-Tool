@@ -1,0 +1,119 @@
+<!-- Copyright 2018 Infosys Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+
+<!-- serverpatchdetailss/templates/serverpatchdetailss/serverpatchdetails_detail.html -->
+
+{% extends "base.html" %}
+
+{% block page_content %}
+
+<script>		
+    setInterval(function(){
+        $(".animate").animate({color: "green"}, "slow");
+        $(".animate").animate({color: "#000"}, "slow");
+    },500);
+</script>
+
+<h3 align="center">Name : {{ serverpatchdetails.hostname}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; UID: <a href ="../trackresult/{{serverpatchdetails.uploadid}}/None">{{ serverpatchdetails.uploadid }}</a></h3>
+<br>
+<div class="row"">
+ <!--  <div class="col-md-2">
+        <div class="card bg-secondary text-white">
+            <div class="card-header">State</div>
+            <div class="card-body"><h5 align="center">{{ serverpatchdetails.state }}</h5></div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-secondary text-white">
+            <div class="card-header">Action</div>
+            <div class="card-body"><h5 align="center">{{ serverpatchdetails.action }}</h5></div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-secondary text-white">
+            <div class="card-header">Remakrs</div>
+            <div class="card-body"><h5 align="center">{{ serverpatchdetails.remarks }}</h5></div>
+        </div>
+    </div>
+    --> 
+    <div class="col-md-2">
+        <div class="card bg-info text-white">
+            <div class="card-header">OS make</div>
+            <div class="card-body"><h5 align="center">{{ serverpatchdetails.osmake }}</h5></div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white">
+            <div class="card-header">OS version</div>
+            <div class="card-body"><h5 align="center">{{ serverpatchdetails.osversion }}</h5></div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white">
+            <div class="card-header">Latest Patch</div>
+            <div class="card-body"><h5 align="center">{{ serverpatchdetails.latestpatch }}</h5></div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white">
+            <div class="card-header">Lot</div>
+            <div class="card-body"><h5 align="center">{{ serverpatchdetails.instance.lot }}</h5></div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white">
+            <div class="card-header">Application Name</div>
+            <div class="card-body"><h5 align="center">{{ serverpatchdetails.instance.appname }}</h5></div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white">
+            <div class="card-header">Application ID</div>
+            <div class="card-body"><h5 align="center">{{ serverpatchdetails.instance.appid }}</h5></div>
+        </div>
+    </div>
+   
+</div>
+<br>
+<div class="row">
+    <table class="table">
+    <tr><th>Date</th><th>Upload id</th><th>State</th><th>Action</th><th>Remarks</th><th>Latest Patch</th><tr>
+    {% for serverpatchdetailsaudit in serverpatchdetailsaudits %}
+    {% if forloop.first %} 
+        <tr>
+            <td style="color:green;font-weight:bolder">{{serverpatchdetailsaudit.update_date}}</td> 
+            <td style="color:green;font-weight:bolder">{{serverpatchdetailsaudit.uploadid}}</td>
+            <td style="color:green;font-weight:bolder">{{serverpatchdetailsaudit.state}}</td>
+            <td style="color:green;font-weight:bolder">{{serverpatchdetailsaudit.action}}</td>
+            <td style="color:green;font-weight:bolder">{{serverpatchdetailsaudit.remarks|split:"~~"|first }}</td>
+            <td style="color:green;font-weight:bolder">{{serverpatchdetailsaudit.latestpatch}}</td>
+  
+        <tr>
+     {%else%}  
+     <tr>
+        <td>{{serverpatchdetailsaudit.update_date}}</td> <td>{{serverpatchdetailsaudit.uploadid}}</td><td>{{serverpatchdetailsaudit.state}}</td>
+        <td>{{serverpatchdetailsaudit.action}}</td><td>{{serverpatchdetailsaudit.remarks|split:"~~"|first }}</td><td>{{serverpatchdetailsaudit.latestpatch}}</td>
+     <tr>    
+     {%endif%}
+    {% endfor %}
+    </table>
+</div>
+{% endblock page_content %}
